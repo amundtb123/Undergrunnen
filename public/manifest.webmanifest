@@ -1,0 +1,16 @@
+{
+  "name": "Undergrunnen",
+  "short_name": "Undergrunnen",
+  "description": "Kjøp billig. Reis. Selg dyrt. Et norsk handelsspill på 30 dager.",
+  "lang": "nb",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1110",
+  "theme_color": "#0d1110",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

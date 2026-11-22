@@ -162,11 +162,14 @@ const EVENTS: readonly EventDef[] = [
   },
 ]
 
-export function rollArrivalEvent(s: GameState): void {
+/** `riskBonus` comes from today's local happening (e.g. a police crackdown). */
+export function rollArrivalEvent(s: GameState, riskBonus = 0): void {
   const city = getCity(s.cityId)!
   const rng = createRng(s.seed, 'event', s.day, s.cityId)
-  if (!rng.chance(RULES.eventBaseChance + city.risk * RULES.eventRiskChance)) return
-  const def = rng.weighted(EVENTS.map((e) => [e, e.weight(s, city)] as const))
+  if (!rng.chance(RULES.eventBaseChance + city.risk * RULES.eventRiskChance + riskBonus)) return
+  const def = rng.weighted(
+    EVENTS.map((e) => [e, e.weight(s, city) * (riskBonus > 0 && e.kind === 'politi' ? 3 : 1)] as const),
+  )
   def?.run(s, rng, city)
 }
 

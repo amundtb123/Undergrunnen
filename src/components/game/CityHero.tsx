@@ -34,7 +34,7 @@ export default function CityHero({ city, day }: { city: City; day: number }) {
         }
       >
         {art ? (
-          <img src={art.src} alt="" className="absolute inset-0 h-full w-full object-cover object-[60%_55%]" />
+          <img src={art.src} alt="" className="absolute inset-0 h-full w-full object-cover object-center" />
         ) : (
           <svg className="absolute inset-x-0 bottom-0 h-16 w-full opacity-60" viewBox="0 0 400 60" preserveAspectRatio="none" aria-hidden>
             <path
@@ -51,7 +51,7 @@ export default function CityHero({ city, day }: { city: City; day: number }) {
         )}
         <div className="absolute inset-x-4 bottom-3">
           <div className="text-[11px] font-semibold tracking-[0.2em] text-glow uppercase">
-            {city.region} · Dag {day}
+            {city.county === city.name ? city.region : city.county} · Dag {day}
           </div>
           <h1 className="font-display text-4xl leading-none font-bold tracking-wide uppercase drop-shadow">{city.name}</h1>
           <div className="mt-0.5 text-sm font-medium text-cta">{city.subtitle}</div>
@@ -59,6 +59,13 @@ export default function CityHero({ city, day }: { city: City; day: number }) {
       </div>
       <div className="px-4 pt-2 pb-3">
         <p className="text-sm text-ink-300">{city.tagline}</p>
+        <ul className="mt-2 flex flex-wrap gap-1.5" aria-label="Kjent for">
+          {city.knownFor.map((k) => (
+            <li key={k} className="rounded-full border border-ink-700 px-2 py-0.5 text-[11px] text-ink-300">
+              {k}
+            </li>
+          ))}
+        </ul>
         <div className="mt-3 grid grid-cols-2 gap-x-5 gap-y-1.5">
           <Bars label="Markedsstørrelse" value={city.marketSize} />
           <Bars label="Konkurranse" value={city.competition} />

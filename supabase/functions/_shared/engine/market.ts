@@ -5,11 +5,22 @@
 import { ITEMS, getCity } from './content.ts'
 import { createRng } from './rng.ts'
 import { RULES } from './rules.ts'
-import type { CityId, ItemId, NewsItem } from './types.ts'
+import type { CityHappening, CityId, ItemId, NewsItem } from './types.ts'
 
 export interface Market {
   prices: Record<ItemId, number>
   news: NewsItem[]
+  /** Today's local happening, if any (from the city pack). */
+  happening: CityHappening | null
+}
+
+/** Separate stream so happenings never disturb the item price draws. */
+export function todaysHappening(seed: number, day: number, cityId: CityId): CityHappening | null {
+  const city = getCity(cityId)
+  if (!city || city.happenings.length === 0) return null
+  const rng = createRng(seed, 'happening', day, cityId)
+  if (!rng.chance(RULES.happeningChance)) return null
+  return rng.pick(city.happenings)
 }
 
 export function roundPrice(p: number): number {
@@ -30,6 +41,12 @@ export function generateMarket(seed: number, day: number, cityId: CityId): Marke
   const outOfStock = RULES.outOfStockChance * ((4 - city.marketSize) / 2)
   const swing = 1.3 - 0.15 * city.competition
   const level = 0.94 + 0.03 * city.demand
+  const happening = todaysHappening(seed, day, cityId)
+  if (happening) news.push({ day, tone: 'neutral', text: happening.text })
+  const happeningMult = (category: string) =>
+    happening?.mult && (happening.categories === 'all' || happening.categories?.includes(category as never))
+      ? happening.mult
+      : 1
 
   for (const item of ITEMS) {
     // Draw everything unconditionally so the stream stays stable if the rules change.
@@ -40,7 +57,7 @@ export function generateMarket(seed: number, day: number, cityId: CityId): Marke
 
     const mod = city.priceMods[item.id] ?? 1
     let price = item.basePrice * mod * level * Math.exp(item.volatility * swing * noise)
-    price = Math.min(item.maxPrice, Math.max(item.minPrice, price))
+    price = Math.min(item.maxPrice, Math.max(item.minPrice, price)) * happeningMult(item.category)
 
     if (shockRoll < RULES.shockChance) {
       const spike = shockRoll < RULES.shockChance / 2
@@ -56,7 +73,7 @@ export function generateMarket(seed: number, day: number, cityId: CityId): Marke
     }
     prices[item.id] = roundPrice(price)
   }
-  return { prices, news }
+  return { prices, news, happening }
 }
 
 /** % change vs yesterday's market in the same city (null = no comparison). */

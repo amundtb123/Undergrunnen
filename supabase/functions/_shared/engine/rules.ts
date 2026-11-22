@@ -18,6 +18,8 @@ export const RULES = {
   outOfStockChance: 0.12,
   /** Chance per item per city per day of a price shock. */
   shockChance: 0.07,
+  /** Chance per city per day of a local happening (city pack events). */
+  happeningChance: 0.15,
 
   /** Base chance of an arrival event, plus per point of city risk. */
   eventBaseChance: 0.28,

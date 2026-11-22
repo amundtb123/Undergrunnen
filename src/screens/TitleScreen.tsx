@@ -1,14 +1,17 @@
 import { RULES } from '@engine/index.ts'
 import type { LocalScore } from '@/features/game/useGame.ts'
 import { kr } from '@/lib/format.ts'
+import Leaderboard from '@/components/game/Leaderboard.tsx'
 
 export default function TitleScreen({
   canContinue,
+  starting,
   scores,
   onContinue,
   onNew,
 }: {
   canContinue: boolean
+  starting: boolean
   scores: LocalScore[]
   onContinue: () => void
   onNew: () => void
@@ -40,11 +43,12 @@ export default function TitleScreen({
         )}
         <button
           onClick={onNew}
-          className={`h-14 w-full rounded-2xl text-base font-bold tracking-wide uppercase active:scale-[0.98] ${
+          disabled={starting}
+          className={`h-14 disabled:opacity-60 w-full rounded-2xl text-base font-bold tracking-wide uppercase active:scale-[0.98] ${
             canContinue ? 'border border-white/15 text-ink-100' : 'bg-cta text-ink-950'
           }`}
         >
-          Nytt spill
+          {starting ? 'Starter…' : 'Nytt spill'}
         </button>
       </div>
 
@@ -55,8 +59,12 @@ export default function TitleScreen({
         <li>◆ Poeng = kontanter + bank − gjeld. Varer teller ikke.</li>
       </ul>
 
+      <div className="mt-10">
+        <Leaderboard limit={10} />
+      </div>
+
       {scores.length > 0 && (
-        <section className="mt-10">
+        <section className="mt-8">
           <h2 className="mb-2 font-display text-sm font-semibold tracking-[0.18em] text-ink-300 uppercase">Dine beste</h2>
           <ol className="overflow-hidden rounded-2xl border border-white/5 bg-ink-900">
             {scores.slice(0, 5).map((s, i) => (
@@ -71,7 +79,7 @@ export default function TitleScreen({
           </ol>
         </section>
       )}
-      <p className="mt-auto pt-10 text-center text-[11px] text-ink-600">Lokal prototype · alle varer er fiktive</p>
+      <p className="mt-auto pt-10 text-center text-[11px] text-ink-600">Prototype · alle varer er fiktive</p>
     </div>
   )
 }

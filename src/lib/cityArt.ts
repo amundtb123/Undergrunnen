@@ -1,12 +1,24 @@
-// City imagery. Only Hamar has art so far: an AI-generated concept image from
-// the starter pack, so it is labelled as concept art in the UI and must not be
-// presented as a photograph. Other cities use the gradient placeholder.
+// City imagery: drop a file named after the city id into src/assets/cities/
+// (hamar.jpg, oslo.jpg, bergen.webp …) and it is picked up automatically.
+// Cities without a file use the gradient placeholder.
+//
+// The images are AI-generated concept art (ChatGPT), so the UI labels them
+// «Konseptbilde» and never presents them as photographs.
 
 export interface CityArt {
   src: string
   credit: string
 }
 
-export const CITY_ART: Record<string, CityArt> = {
-  hamar: { src: '/cities/hamar.jpg', credit: 'Konseptbilde' },
-}
+const files = import.meta.glob<string>('../assets/cities/*.{jpg,jpeg,png,webp}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+})
+
+export const CITY_ART: Record<string, CityArt> = Object.fromEntries(
+  Object.entries(files).map(([path, src]) => {
+    const id = path.split('/').pop()!.replace(/\.\w+$/, '')
+    return [id, { src, credit: 'Konseptbilde' }]
+  }),
+)

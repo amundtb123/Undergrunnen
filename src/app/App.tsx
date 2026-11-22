@@ -17,7 +17,8 @@ import GameOverScreen from '@/screens/GameOverScreen.tsx'
 const TRANSIT_MS = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 300 : 1400
 
 export default function App() {
-  const { game, scores, error, dispatch, newGame, quit, clearError } = useGame()
+  const { game, save, scores, error, starting, submit, playerName, dispatch, newGame, submitScore, quit, clearError } =
+    useGame()
   const [inGame, setInGame] = useState(false)
   const [tab, setTab] = useState<Tab>('marked')
   const [tradeItem, setTradeItem] = useState<ItemId | null>(null)
@@ -39,16 +40,17 @@ export default function App() {
     document.querySelector('main')?.scrollTo({ top: 0 })
   }, [tab, game?.cityId])
 
-  const startNew = () => {
-    newGame()
+  const startNew = async () => {
+    await newGame()
     setTab('marked')
     setInGame(true)
   }
 
-  if (!game || !inGame) {
+  if (!game || !save || !inGame) {
     return (
       <TitleScreen
         canContinue={!!game && game.status === 'active'}
+        starting={starting}
         scores={scores}
         onContinue={() => setInGame(true)}
         onNew={startNew}
@@ -59,7 +61,11 @@ export default function App() {
   if (game.status !== 'active' && !transit) {
     return (
       <GameOverScreen
-        game={game}
+        key={save.runId ?? game.seed}
+        save={save}
+        submit={submit}
+        defaultName={playerName}
+        onSubmit={submitScore}
         onNew={startNew}
         onMenu={() => {
           quit()

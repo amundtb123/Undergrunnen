@@ -24,9 +24,12 @@ export default function TravelScreen({ game, onTravel }: { game: GameState; onTr
         <div key={dest.id} ref={(el) => el?.scrollIntoView({ behavior: "smooth", block: "nearest" })} className="mt-4 animate-fade-in rounded-2xl border border-white/10 bg-ink-850 p-4">
           <div className="flex items-start justify-between">
             <div>
-              <div className="text-[11px] font-semibold tracking-[0.18em] text-ink-400 uppercase">{dest.region}</div>
+              <div className="text-[11px] font-semibold tracking-[0.18em] text-ink-400 uppercase">
+                {dest.county === dest.name ? dest.region : `${dest.county} · ${dest.region}`}
+              </div>
               <div className="font-display text-2xl font-bold tracking-wide uppercase">{dest.name}</div>
               <p className="text-sm text-ink-400">{dest.tagline}</p>
+              <p className="mt-1 text-xs text-ink-400/80">{dest.geography}</p>
             </div>
             <div className="text-right text-xs text-ink-400">
               Risiko

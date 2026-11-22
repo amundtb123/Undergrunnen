@@ -4,10 +4,29 @@
 export type CityId = string
 export type ItemId = string
 
+export type ItemCategory = 'mat' | 'nytelse' | 'mote' | 'elektronikk' | 'samleobjekt' | 'luksus'
+
+/** Fictional local happening (city pack «fictional_events»). Game fiction, not fact. */
+export interface CityHappening {
+  text: string
+  /** Price multiplier for these categories ('all' = every item) on that day. */
+  categories?: ItemCategory[] | 'all'
+  mult?: number
+  /** Extra chance of an arrival event, police weighted up. */
+  riskBonus?: number
+}
+
 export interface City {
   id: CityId
   name: string
+  /** Fylke. */
+  county: string
   region: string
+  /** Landmarks from the city pack, shown as chips. */
+  knownFor: string[]
+  /** One factual orientation line. */
+  geography: string
+  happenings: CityHappening[]
   lat: number
   lng: number
   /** Short identity line, e.g. «Mjøsas knutepunkt». */
@@ -32,7 +51,7 @@ export interface City {
 export interface Item {
   id: ItemId
   name: string
-  category: 'mat' | 'nytelse' | 'mote' | 'elektronikk' | 'samleobjekt' | 'luksus'
+  category: ItemCategory
   description: string
   basePrice: number
   minPrice: number

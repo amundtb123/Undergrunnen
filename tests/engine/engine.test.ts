@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  applyAction, createGame, generateMarket, inventoryUsed, maxBuy, route, RULES, type GameState,
+  applyAction, CITIES, createGame, generateMarket, inventoryUsed, maxBuy, route, RULES, todaysHappening, type GameState,
 } from '@engine/index.ts'
 
 const ok = (s: GameState, a: Parameters<typeof applyAction>[1]) => {
@@ -139,5 +139,24 @@ describe('Hamar', () => {
       oslo += Object.keys(generateMarket(seed, 5, 'oslo').prices).length
     }
     expect(hamar).toBeLessThan(oslo)
+  })
+})
+
+describe('city happenings (city pack)', () => {
+  it('every city has happenings, and they show up and move prices', () => {
+    for (const city of CITIES) expect(city.happenings.length).toBeGreaterThan(0)
+    let seen = 0
+    for (let seed = 0; seed < 300; seed++) {
+      const h = todaysHappening(seed, 3, 'tromso')
+      const m = generateMarket(seed, 3, 'tromso')
+      expect(m.happening).toEqual(h)
+      if (h) {
+        seen++
+        expect(m.news.some((n) => n.text === h.text)).toBe(true)
+      }
+    }
+    // ~15 % of days
+    expect(seen).toBeGreaterThan(20)
+    expect(seen).toBeLessThan(80)
   })
 })

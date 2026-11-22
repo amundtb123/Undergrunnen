@@ -116,7 +116,7 @@ function apply(s: GameState, a: Action): GameErrorCode | null {
             : `Ankom ${to.name} med ${r.mode.toLowerCase()} etter ${r.days} dag${r.days > 1 ? 'er' : ''}.`,
         },
       )
-      rollArrivalEvent(s)
+      rollArrivalEvent(s, m.happening?.riskBonus ?? 0)
       checkHealth(s)
       return null
     }

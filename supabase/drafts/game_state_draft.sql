@@ -1,6 +1,9 @@
 -- =====================================================================
 -- UNDERGRUNNEN — initial schema
 -- STATUS: DRAFT / PROPOSAL. DO NOT EXECUTE until explicitly approved.
+-- NOTE: the schema itself is created by migrations/20261123000000_undergrunnen_scores.sql.
+--       Before turning this into a migration, drop the `create schema` and the
+--       schema grants below, and rename `highscores` (anonymous `scores` exists).
 --
 -- Target:   shared Supabase project bfynfdqpedqtgtqiczpb
 -- Scope:    creates objects ONLY inside the new schema `undergrunnen`.

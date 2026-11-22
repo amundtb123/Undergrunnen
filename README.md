@@ -9,6 +9,7 @@ npm install
 npm run dev        # http://localhost:5173 (also reachable from a phone on the same network)
 npm test           # engine unit tests + balance simulation
 npm run sim        # balance report only
+npm run deploy     # build + publish to undergrunnen.dilldall.net (Netlify)
 ```
 
 - Engine (shared with the future Edge Functions): `supabase/functions/_shared/engine/`

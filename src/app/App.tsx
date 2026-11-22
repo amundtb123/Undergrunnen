@@ -17,8 +17,10 @@ import GameOverScreen from '@/screens/GameOverScreen.tsx'
 const TRANSIT_MS = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 300 : 1400
 
 export default function App() {
-  const { game, save, scores, error, starting, submit, playerName, dispatch, newGame, submitScore, quit, clearError } =
-    useGame()
+  const {
+    game, save, scores, error, starting, submit, playerName, mode, setMode,
+    dispatch, newGame, submitScore, quit, clearError,
+  } = useGame()
   const [inGame, setInGame] = useState(false)
   const [tab, setTab] = useState<Tab>('marked')
   const [tradeItem, setTradeItem] = useState<ItemId | null>(null)
@@ -52,6 +54,8 @@ export default function App() {
         canContinue={!!game && game.status === 'active'}
         starting={starting}
         scores={scores}
+        mode={mode}
+        onSetMode={setMode}
         onContinue={() => setInGame(true)}
         onNew={startNew}
       />

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { ITEMS, getCity, marketTrend, type GameState, type ItemId } from '@engine/index.ts'
+import { getCity, itemsFor, marketTrend, type GameState, type ItemId } from '@engine/index.ts'
 import CityHero from '@/components/game/CityHero.tsx'
 import { kr, num } from '@/lib/format.ts'
 
@@ -24,8 +24,8 @@ export default function MarketScreen({
   const today = game.news.filter((n) => n.day === game.day)
   const lastDay = game.day >= game.maxDays
   const trend = useMemo(
-    () => marketTrend(game.seed, game.day, game.cityId, game.market),
-    [game.seed, game.day, game.cityId, game.market],
+    () => marketTrend(game.seed, game.day, game.cityId, game.market, game.mode),
+    [game.seed, game.day, game.cityId, game.market, game.mode],
   )
 
   return (
@@ -66,7 +66,7 @@ export default function MarketScreen({
           <span className="text-[11px] text-ink-400">▲▼ fra i går · trykk for å handle</span>
         </div>
         <ul className="overflow-hidden rounded-2xl border border-white/5 bg-ink-900">
-          {ITEMS.map((item) => {
+          {itemsFor(game.mode).map((item) => {
             const price = game.market[item.id]
             const held = game.inventory[item.id]
             const tag = price ? priceTag(price / item.basePrice) : null

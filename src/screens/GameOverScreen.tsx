@@ -93,7 +93,7 @@ export default function GameOverScreen({
         )}
       </section>
 
-      <Leaderboard highlight={save.submitted?.name} refreshKey={save.submitted ? 1 : 0} />
+      <Leaderboard mode={game.mode} highlight={save.submitted?.name} refreshKey={save.submitted ? 1 : 0} />
 
       <dl className="overflow-hidden rounded-2xl border border-ink-700/70 bg-ink-900">
         {rows.map(([k, v]) => (

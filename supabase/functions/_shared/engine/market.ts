@@ -2,10 +2,10 @@
 // independently each day (Dope Wars style) around a city-adjusted base, with
 // occasional shocks that break the normal band.
 
-import { ITEMS, getCity } from './content.ts'
+import { getCity, itemsFor, priceMod } from './content.ts'
 import { createRng } from './rng.ts'
 import { RULES } from './rules.ts'
-import type { CityHappening, CityId, ItemId, NewsItem } from './types.ts'
+import type { CityHappening, CityId, GameMode, ItemId, NewsItem } from './types.ts'
 
 export interface Market {
   prices: Record<ItemId, number>
@@ -29,7 +29,7 @@ export function roundPrice(p: number): number {
   return Math.round(p / 10) * 10
 }
 
-export function generateMarket(seed: number, day: number, cityId: CityId): Market {
+export function generateMarket(seed: number, day: number, cityId: CityId, mode: GameMode = 'clean'): Market {
   const city = getCity(cityId)
   if (!city) throw new Error(`Unknown city ${cityId}`)
   const rng = createRng(seed, 'market', day, cityId)
@@ -48,14 +48,14 @@ export function generateMarket(seed: number, day: number, cityId: CityId): Marke
       ? happening.mult
       : 1
 
-  for (const item of ITEMS) {
+  for (const item of itemsFor(mode)) {
     // Draw everything unconditionally so the stream stays stable if the rules change.
     const missing = rng.chance(outOfStock)
     const noise = rng.normal()
     const shockRoll = rng.next()
     const shockSize = rng.next()
 
-    const mod = city.priceMods[item.id] ?? 1
+    const mod = priceMod(city, item.id)
     let price = item.basePrice * mod * level * Math.exp(item.volatility * swing * noise)
     price = Math.min(item.maxPrice, Math.max(item.minPrice, price)) * happeningMult(item.category)
 
@@ -77,9 +77,15 @@ export function generateMarket(seed: number, day: number, cityId: CityId): Marke
 }
 
 /** % change vs yesterday's market in the same city (null = no comparison). */
-export function marketTrend(seed: number, day: number, cityId: CityId, today: Record<ItemId, number>) {
+export function marketTrend(
+  seed: number,
+  day: number,
+  cityId: CityId,
+  today: Record<ItemId, number>,
+  mode: GameMode = 'clean',
+) {
   const trend: Record<ItemId, number | null> = {}
-  const prev = day > 1 ? generateMarket(seed, day - 1, cityId).prices : {}
+  const prev = day > 1 ? generateMarket(seed, day - 1, cityId, mode).prices : {}
   for (const [id, price] of Object.entries(today)) {
     const p = prev[id]
     trend[id] = p ? Math.round(((price - p) / p) * 100) : null

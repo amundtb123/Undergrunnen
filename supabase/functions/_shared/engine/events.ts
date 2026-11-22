@@ -2,7 +2,7 @@
 // choice events set `pendingEvent` and block other actions until resolved.
 // All functions mutate a draft state that the caller has already cloned.
 
-import { CITIES, CONTACTS, ITEMS, getCity, getItem } from './content.ts'
+import { CITIES, CONTACTS, getCity, getItem, itemsFor } from './content.ts'
 import { inventoryFree, inventoryUsed } from './economy.ts'
 import { generateMarket } from './market.ts'
 import { createRng, type Rng } from './rng.ts'
@@ -77,7 +77,7 @@ const EVENTS: readonly EventDef[] = [
     kind: 'funn',
     weight: (s) => (inventoryFree(s) >= 4 ? 1.2 : 0),
     run: (s, rng, c) => {
-      const fits = ITEMS.filter((i) => i.size <= inventoryFree(s) && i.basePrice < 5000)
+      const fits = itemsFor(s.mode).filter((i) => i.size <= inventoryFree(s) && i.basePrice < 5000)
       if (fits.length === 0) return
       const item = rng.pick(fits)
       const qty = Math.min(rng.int(2, 8), Math.floor(inventoryFree(s) / item.size))
@@ -143,7 +143,7 @@ const EVENTS: readonly EventDef[] = [
       const r = route(c.id, target.id)
       const day = s.day + r.days
       if (day > s.maxDays) return
-      const m = generateMarket(s.seed, day, target.id)
+      const m = generateMarket(s.seed, day, target.id, s.mode)
       let bestId: string | null = null
       let bestLog = 0
       for (const [id, price] of Object.entries(m.prices)) {

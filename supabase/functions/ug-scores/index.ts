@@ -1,8 +1,8 @@
 // ug-scores: anonymous, server-verified highscores for Undergrunnen.
 //
-//   POST /ug-scores/start              → { runId, seed }       server picks the seed
+//   POST /ug-scores/start              { mode? } → { runId, seed }   server picks the seed
 //   POST /ug-scores/submit             { runId, name, actions } → { score, rank }
-//   GET  /ug-scores/top?limit=20       → { scores: [...] }
+//   GET  /ug-scores/top?limit=20&mode=clean|classic → { scores: [...] }
 //
 // The submitted action log is replayed with the shared engine; only the
 // replayed score is stored. Talks to Postgres directly (SUPABASE_DB_URL), so
@@ -20,6 +20,7 @@ const ALLOWED_ORIGINS = new Set([
 ])
 const RUNS_PER_HOUR = 40
 const MAX_BODY_BYTES = 400_000
+const parseMode = (m: unknown): 'clean' | 'classic' => (m === 'classic' ? 'classic' : 'clean')
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function cors(req: Request): Record<string, string> {
@@ -60,9 +61,11 @@ async function start(req: Request): Promise<Response> {
     select count(*)::int as n from undergrunnen.runs
     where client_hash = ${hash} and created_at > now() - interval '1 hour'`
   if (n >= RUNS_PER_HOUR) return json(req, 429, { error: 'RATE_LIMITED' })
+  const body = (await req.json().catch(() => ({}))) as { mode?: unknown }
+  const mode = parseMode(body?.mode)
   const seed = crypto.getRandomValues(new Uint32Array(1))[0]!
   const [run] = await sql<{ id: string }[]>`
-    insert into undergrunnen.runs (seed, client_hash) values (${seed}, ${hash}) returning id`
+    insert into undergrunnen.runs (seed, client_hash, mode) values (${seed}, ${hash}, ${mode}) returning id`
   return json(req, 200, { runId: run!.id, seed })
 }
 
@@ -80,7 +83,7 @@ async function submit(req: Request): Promise<Response> {
     if (!run) return json(req, 404, { error: 'RUN_NOT_FOUND' })
     if (run.submitted_at) return json(req, 409, { error: 'ALREADY_SUBMITTED' })
 
-    const result = replayGame(Number(run.seed), body.actions)
+    const result = replayGame(Number(run.seed), body.actions, parseMode(run.mode))
     if (!result.ok) return json(req, 422, { error: result.reason })
     const s = result.state
 
@@ -97,9 +100,10 @@ async function submit(req: Request): Promise<Response> {
 async function top(req: Request): Promise<Response> {
   const url = new URL(req.url)
   const limit = Math.min(50, Math.max(1, Number(url.searchParams.get('limit')) || 20))
+  const mode = parseMode(url.searchParams.get('mode'))
   const rows = await sql`
     select name, score, status, days_played, created_at from undergrunnen.scores
-    where mode = 'clean' order by score desc, created_at asc limit ${limit}`
+    where mode = ${mode} order by score desc, created_at asc limit ${limit}`
   return json(req, 200, {
     scores: rows.map((r) => ({
       name: r.name,

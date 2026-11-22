@@ -3,7 +3,7 @@
 // number sent by the client.
 
 import { applyAction, createGame } from './game.ts'
-import type { Action, GameState } from './types.ts'
+import type { Action, GameMode, GameState } from './types.ts'
 
 export const MAX_ACTIONS = 5000
 
@@ -19,10 +19,10 @@ function isAction(a: unknown): a is Action {
   return typeof t === 'string' && ACTION_TYPES.has(t)
 }
 
-export function replayGame(seed: number, actions: unknown): ReplayResult {
+export function replayGame(seed: number, actions: unknown, mode: GameMode = 'clean'): ReplayResult {
   if (!Array.isArray(actions)) return { ok: false, reason: 'BAD_ACTION' }
   if (actions.length > MAX_ACTIONS) return { ok: false, reason: 'TOO_MANY_ACTIONS' }
-  let state = createGame(seed)
+  let state = createGame(seed, mode)
   let rejected = 0
   for (const a of actions) {
     if (!isAction(a)) return { ok: false, reason: 'BAD_ACTION' }

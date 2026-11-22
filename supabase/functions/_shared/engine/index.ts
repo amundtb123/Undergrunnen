@@ -1,6 +1,7 @@
 export * from './types.ts'
 export { RULES } from './rules.ts'
-export { CITIES, ITEMS, CONTACTS, HOME_CITY, getCity, getItem } from './content.ts'
+export { CITIES, ITEMS, CONTACTS, HOME_CITY, getCity, getItem, itemsFor, priceMod } from './content.ts'
+export { CLASSIC_ITEMS } from './content.classic.ts'
 export { createRng, newSeed } from './rng.ts'
 export { generateMarket, marketTrend, todaysHappening } from './market.ts'
 export { route, distanceKm, type Route } from './travel.ts'

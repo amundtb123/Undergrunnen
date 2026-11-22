@@ -1,7 +1,7 @@
 // Client for the ug-scores Edge Function. No login and no keys: the function
 // is public and verifies every result by replaying it.
 
-import type { Action } from '@engine/index.ts'
+import type { Action, GameMode } from '@engine/index.ts'
 
 const BASE =
   (import.meta.env.VITE_SCORES_URL as string | undefined) ??
@@ -32,7 +32,8 @@ async function call<T>(path: string, init: RequestInit = {}, timeoutMs = 6000): 
   }
 }
 
-export const startRun = () => call<{ runId: string; seed: number }>('start', { method: 'POST', body: '{}' }, 4000)
+export const startRun = (mode: GameMode) =>
+  call<{ runId: string; seed: number }>('start', { method: 'POST', body: JSON.stringify({ mode }) }, 4000)
 
 export const submitRun = (runId: string, name: string, actions: Action[]) =>
   call<{ score: number; status: string; rank: number }>('submit', {
@@ -40,4 +41,5 @@ export const submitRun = (runId: string, name: string, actions: Action[]) =>
     body: JSON.stringify({ runId, name, actions }),
   }, 15000)
 
-export const fetchTop = (limit = 20) => call<{ scores: TopScore[] }>(`top?limit=${limit}`).then((r) => r.scores)
+export const fetchTop = (limit = 20, mode: GameMode = 'clean') =>
+  call<{ scores: TopScore[] }>(`top?limit=${limit}&mode=${mode}`).then((r) => r.scores)

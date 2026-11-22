@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  applyAction, CITIES, createGame, createRng, ITEMS, maxBuy, replayGame, type Action, type GameState,
+  applyAction, CITIES, CLASSIC_ITEMS, createGame, createRng, ITEMS, maxBuy, replayGame, type Action, type GameState,
 } from '@engine/index.ts'
 
 /** A chaotic bot that also sends invalid actions, logging everything it tries. */
@@ -51,5 +51,26 @@ describe('replay', () => {
     expect(replayGame(1, [{ type: 'hack' }])).toEqual({ ok: false, reason: 'BAD_ACTION' })
     expect(replayGame(1, 'nope')).toEqual({ ok: false, reason: 'BAD_ACTION' })
     expect(replayGame(1, new Array(6000).fill({ type: 'retire' }))).toEqual({ ok: false, reason: 'TOO_MANY_ACTIONS' })
+  })
+})
+
+describe('Classic Mode', () => {
+  it('trades only Classic goods and replays in the right mode', () => {
+    const s = createGame(42, 'classic')
+    const classicIds = new Set(CLASSIC_ITEMS.map((i) => i.id))
+    expect(s.mode).toBe('classic')
+    expect(Object.keys(s.market).every((id) => classicIds.has(id))).toBe(true)
+    const id = Object.keys(s.market)[0]!
+    let g = applyAction(s, { type: 'buy', itemId: id, qty: 1 })
+    expect(g.ok).toBe(true)
+    if (!g.ok) return
+    g = applyAction(g.state, { type: 'retire' })
+    if (!g.ok) return
+    const log: Action[] = [{ type: 'buy', itemId: id, qty: 1 }, { type: 'retire' }]
+    const r = replayGame(42, log, 'classic')
+    expect(r.ok && r.state.score).toBe(g.state.score)
+    // Clean replay of a Classic log does not reproduce it (item not sold in Clean).
+    const clean = replayGame(42, log, 'clean')
+    expect(clean.ok && clean.state.cash).not.toBe(g.state.cash)
   })
 })

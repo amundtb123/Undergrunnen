@@ -2,7 +2,8 @@
 // become the seed SQL once the content is settled. All goods are fictional
 // satire. City descriptions are game fiction, not claims about real places.
 
-import type { City, Item } from './types.ts'
+import { CLASSIC_ITEMS, CLASSIC_MODS } from './content.classic.ts'
+import type { City, GameMode, Item } from './types.ts'
 
 export const CITIES: readonly City[] = [
   {
@@ -233,7 +234,17 @@ export const CONTACTS = {
 } as const
 
 const cityById = new Map(CITIES.map((c) => [c.id, c]))
-const itemById = new Map(ITEMS.map((i) => [i.id, i]))
+const itemById = new Map([...ITEMS, ...CLASSIC_ITEMS].map((i) => [i.id, i]))
+
+/** The goods traded in a given mode. */
+export function itemsFor(mode: GameMode | undefined): readonly Item[] {
+  return mode === 'classic' ? CLASSIC_ITEMS : ITEMS
+}
+
+/** City price multiplier for an item (Clean or Classic). */
+export function priceMod(city: City, itemId: string): number {
+  return city.priceMods[itemId] ?? CLASSIC_MODS[city.id]?.[itemId] ?? 1
+}
 
 export function getCity(id: string): City | undefined {
   return cityById.get(id)

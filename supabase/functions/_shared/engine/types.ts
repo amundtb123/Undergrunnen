@@ -4,6 +4,8 @@
 export type CityId = string
 export type ItemId = string
 
+export type GameMode = 'clean' | 'classic'
+
 export type ItemCategory = 'mat' | 'nytelse' | 'mote' | 'elektronikk' | 'samleobjekt' | 'luksus'
 
 /** Fictional local happening (city pack «fictional_events»). Game fiction, not fact. */
@@ -102,6 +104,8 @@ export interface GameStats {
 
 export interface GameState {
   schema: 1
+  /** Clean (default) or Classic (18+). Older saves without it are Clean. */
+  mode: GameMode
   /** Incremented on every accepted action (optimistic concurrency later). */
   rev: number
   seed: number

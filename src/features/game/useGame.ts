@@ -3,13 +3,14 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import {
-  applyAction, createGame, ERROR_MESSAGES, newSeed, rankTitle, type Action, type GameState,
+  applyAction, createGame, ERROR_MESSAGES, newSeed, rankTitle, type Action, type GameMode, type GameState,
 } from '@engine/index.ts'
 import { startRun, submitRun } from '@/lib/scoresApi.ts'
 
 const SAVE_KEY = 'undergrunnen.save.v2'
 const SCORES_KEY = 'undergrunnen.scores.v1'
 const NAME_KEY = 'undergrunnen.name'
+const MODE_KEY = 'undergrunnen.mode'
 
 export interface LocalScore {
   score: number
@@ -57,12 +58,20 @@ const SUBMIT_ERRORS: Record<string, string> = {
 export function useGame() {
   const [save, setSave] = useState<Save | null>(() => {
     const s = read<Save | null>(SAVE_KEY, null)
-    return s?.game?.schema === 1 ? s : null
+    if (s?.game?.schema !== 1) return null
+    // Saves from before Classic Mode have no mode: they are Clean.
+    return s.game.mode ? s : { ...s, game: { ...s.game, mode: 'clean' } }
   })
   const [scores, setScores] = useState<LocalScore[]>(() => read(SCORES_KEY, []))
   const [error, setError] = useState<{ id: number; text: string } | null>(null)
   const [starting, setStarting] = useState(false)
   const [submit, setSubmit] = useState<SubmitState>({ status: 'idle' })
+  /** Mode for the next new game. Classic is unlocked by a hidden gesture. */
+  const [mode, setModeState] = useState<GameMode>(() => (read<string>(MODE_KEY, 'clean') === 'classic' ? 'classic' : 'clean'))
+  const setMode = useCallback((m: GameMode) => {
+    setModeState(m)
+    write(MODE_KEY, JSON.stringify(m))
+  }, [])
   const [playerName, setPlayerName] = useState<string>(() => {
     try {
       return localStorage.getItem(NAME_KEY) ?? ''
@@ -109,15 +118,15 @@ export function useGame() {
     let seed = newSeed()
     let runId: string | null = null
     try {
-      const run = await startRun()
+      const run = await startRun(mode)
       seed = run.seed
       runId = run.runId
     } catch {
       /* offline: play anyway, just not eligible for the list */
     }
-    setSave({ game: createGame(seed), runId, actions: [], submitted: null })
+    setSave({ game: createGame(seed, mode), runId, actions: [], submitted: null })
     setStarting(false)
-  }, [])
+  }, [mode])
 
   const submitScore = useCallback(
     async (rawName: string) => {
@@ -142,5 +151,8 @@ export function useGame() {
   const quit = useCallback(() => setSave(null), [])
   const clearError = useCallback(() => setError(null), [])
 
-  return { game, save, scores, error, starting, submit, playerName, dispatch, newGame, submitScore, quit, clearError }
+  return {
+    game, save, scores, error, starting, submit, playerName, mode,
+    setMode, dispatch, newGame, submitScore, quit, clearError,
+  }
 }

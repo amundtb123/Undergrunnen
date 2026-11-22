@@ -8,14 +8,15 @@ import { generateMarket } from './market.ts'
 import { RULES } from './rules.ts'
 import { finalScore } from './scoring.ts'
 import { route, type Route } from './travel.ts'
-import type { Action, ActionResult, GameErrorCode, GameState } from './types.ts'
+import type { Action, ActionResult, GameErrorCode, GameMode, GameState } from './types.ts'
 
 const NEWS_LIMIT = 60
 
-export function createGame(seed: number): GameState {
-  const market = generateMarket(seed, 1, RULES.startCityId)
+export function createGame(seed: number, mode: GameMode = 'clean'): GameState {
+  const market = generateMarket(seed, 1, RULES.startCityId, mode)
   return {
     schema: 1,
+    mode,
     rev: 0,
     seed,
     status: 'active',
@@ -104,7 +105,7 @@ function apply(s: GameState, a: Action): GameErrorCode | null {
       s.day += r.days
       s.cityId = a.to
       if (!s.stats.visited.includes(a.to)) s.stats.visited.push(a.to)
-      const m = generateMarket(s.seed, s.day, a.to)
+      const m = generateMarket(s.seed, s.day, a.to, s.mode)
       s.market = m.prices
       s.news.unshift(
         ...m.news,

@@ -44,11 +44,6 @@ export default function CityHero({ city, day }: { city: City; day: number }) {
           </svg>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-ink-900 via-ink-900/25 to-transparent" />
-        {art && (
-          <span className="absolute top-2 right-2 rounded bg-black/45 px-1.5 py-0.5 text-[9px] tracking-wider text-ink-300 uppercase backdrop-blur-sm">
-            {art.credit}
-          </span>
-        )}
         <div className="absolute inset-x-4 bottom-3">
           <div className="text-[11px] font-semibold tracking-[0.2em] text-glow uppercase">
             {city.county === city.name ? city.region : city.county} · Dag {day}

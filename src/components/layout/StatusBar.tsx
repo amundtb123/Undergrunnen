@@ -21,7 +21,12 @@ export default function StatusBar({ game }: { game: GameState }) {
   return (
     <header className="sticky top-0 z-30 border-b border-ink-700/70 bg-ink-950/90 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 backdrop-blur-md">
       <div className="flex items-center justify-between">
-        <div className="font-display text-[15px] font-bold tracking-[0.12em] uppercase italic">Undergrunnen</div>
+        <div className="flex items-center gap-2">
+          <div className="font-display text-[15px] font-bold tracking-[0.12em] uppercase italic">Undergrunnen</div>
+          {game.mode === 'classic' && (
+            <span className="rounded border border-alert/50 px-1 text-[9px] font-bold tracking-wider text-alert uppercase">Classic</span>
+          )}
+        </div>
         <div className="flex items-center gap-2 text-xs text-ink-300">
           {daysLeft <= 3 && game.status === 'active' && (
             <span className="rounded bg-loss/15 px-1.5 py-0.5 text-[10px] font-bold text-loss uppercase">

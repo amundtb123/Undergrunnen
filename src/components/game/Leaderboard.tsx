@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { GameMode } from '@engine/index.ts'
 import { fetchTop, type TopScore } from '@/lib/scoresApi.ts'
 import { kr } from '@/lib/format.ts'
 
@@ -7,7 +8,9 @@ export default function Leaderboard({
   limit = 10,
   highlight,
   refreshKey = 0,
+  mode = 'clean',
 }: {
+  mode?: GameMode
   limit?: number
   highlight?: string
   refreshKey?: number
@@ -18,17 +21,19 @@ export default function Leaderboard({
   useEffect(() => {
     let alive = true
     setFailed(false)
-    fetchTop(limit)
+    fetchTop(limit, mode)
       .then((r) => alive && setRows(r))
       .catch(() => alive && setFailed(true))
     return () => {
       alive = false
     }
-  }, [limit, refreshKey])
+  }, [limit, refreshKey, mode])
 
   return (
     <section>
-      <h2 className="mb-2 font-display text-sm font-semibold tracking-[0.18em] text-ink-300 uppercase">Topplisten</h2>
+      <h2 className="mb-2 font-display text-sm font-semibold tracking-[0.18em] text-ink-300 uppercase">
+        Topplisten{mode === 'classic' && <span className="ml-2 text-alert">Classic</span>}
+      </h2>
       <div className="overflow-hidden rounded-2xl border border-ink-700/70 bg-ink-900">
         {failed ? (
           <p className="px-4 py-3 text-sm text-ink-400">Fikk ikke hentet listen akkurat nå.</p>

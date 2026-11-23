@@ -127,7 +127,14 @@ export default function MarketScreen({
                     owned ? 'border-cta/45 bg-cta/[0.06]' : 'border-white/5 bg-ink-900'
                   }`}
                 >
-                  <span className="truncate text-[13px] font-semibold">{item.name}</span>
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    {owned && (
+                      <span className="tabular shrink-0 rounded-full bg-cta px-1.5 text-[11px] leading-[16px] font-bold text-ink-950">
+                        {num(h.qty)}
+                      </span>
+                    )}
+                    <span className="truncate text-[13px] font-semibold">{item.name}</span>
+                  </div>
                   <div className="flex flex-1 items-center justify-between gap-2">
                   <div className="flex min-w-0 flex-col justify-center gap-0.5">
                     {price ? (
@@ -135,18 +142,11 @@ export default function MarketScreen({
                     ) : (
                       <div className="text-xs text-ink-400">Ikke i dag</div>
                     )}
-                    {owned && (
-                      <div className="flex items-center gap-1.5 text-[10px] font-semibold">
-                        <span className="tabular rounded-full bg-cta px-1.5 text-[11px] leading-[16px] font-bold text-ink-950">
-                          {num(h.qty)}
-                        </span>
-                        {pl !== null && (
-                          <span className={`tabular ${pl >= 0 ? 'text-gain' : 'text-loss'}`} title="Gevinst mot snittpris">
-                            {pl >= 0 ? '+' : '−'}
-                            {Math.abs(pl)}%
-                          </span>
-                        )}
-                      </div>
+                    {pl !== null && (
+                      <span className={`tabular text-[10px] font-semibold ${pl >= 0 ? 'text-gain' : 'text-loss'}`} title="Gevinst mot snittpris">
+                        {pl >= 0 ? '+' : '−'}
+                        {Math.abs(pl)}% mot snitt
+                      </span>
                     )}
                   </div>
                   <div className="flex shrink-0 flex-col items-end justify-center gap-1 text-[10px] font-semibold">

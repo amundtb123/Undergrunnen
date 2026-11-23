@@ -19,7 +19,7 @@ export default function StatusBar({ game, onHome }: { game: GameState; onHome: (
   const daysLeft = game.maxDays - game.day
 
   return (
-    <header className="sticky top-0 z-30 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pb-1">
+    <header className="relative z-30 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pb-1">
       <div className="rounded-2xl border border-white/10 bg-ink-950/45 px-4 pt-3 pb-3 shadow-lg shadow-black/30 backdrop-blur-md">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

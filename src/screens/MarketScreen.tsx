@@ -29,7 +29,7 @@ export default function MarketScreen({
   )
 
   return (
-    <div className="space-y-4 px-4 pb-4">
+    <div className="space-y-4 px-4 py-4">
       <CityHero city={city} day={game.day} />
 
       {lastDay && (

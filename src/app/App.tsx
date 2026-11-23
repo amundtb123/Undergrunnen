@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { tripFor, type CityId, type ItemId } from '@engine/index.ts'
+import { getCity, tripFor, type CityId, type ItemId } from '@engine/index.ts'
 import { useGame } from '@/features/game/useGame.ts'
+import { CityBackdrop } from '@/components/game/CityHero.tsx'
 import StatusBar from '@/components/layout/StatusBar.tsx'
 import BottomNav, { type Tab } from '@/components/layout/BottomNav.tsx'
 import TradeSheet from '@/components/game/TradeSheet.tsx'
@@ -91,9 +92,10 @@ export default function App() {
 
   return (
     <div className="mx-auto flex h-dvh max-w-[480px] flex-col bg-ink-950 sm:border-x sm:border-white/5">
-      <StatusBar game={game} onHome={() => setInGame(false)} />
-      <main className="flex-1 overflow-y-auto overscroll-contain">
-        <div key={`${tab}-${game.cityId}-${game.day}`} className="animate-fade-in">
+      <main className="relative flex-1 overflow-y-auto overscroll-contain">
+        <CityBackdrop city={getCity(game.cityId)!} />
+        <StatusBar game={game} onHome={() => setInGame(false)} />
+        <div key={`${tab}-${game.cityId}-${game.day}`} className="relative animate-fade-in">
           {tab === 'marked' && (
             <MarketScreen game={game} onPick={setTradeItem} onFinish={() => dispatch({ type: 'retire' })} />
           )}

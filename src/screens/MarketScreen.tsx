@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { getCity, itemsFor, marketTrend, type GameState, type ItemId } from '@engine/index.ts'
 import CityHero from '@/components/game/CityHero.tsx'
 import { kr, num } from '@/lib/format.ts'
@@ -22,19 +22,11 @@ export default function MarketScreen({
 }) {
   const city = getCity(game.cityId)!
   const today = game.news.filter((n) => n.day === game.day)
-  const [showAllNews, setShowAllNews] = useState(false)
   const lastDay = game.day >= game.maxDays
   const trend = useMemo(
     () => marketTrend(game.seed, game.day, game.cityId, game.market, game.mode),
     [game.seed, game.day, game.cityId, game.market, game.mode],
   )
-  const held = itemsFor(game.mode)
-    .map((item) => {
-      const h = game.inventory[item.id]
-      return { item, qty: h?.qty ?? 0, avgCost: h?.avgCost ?? 0, price: game.market[item.id] }
-    })
-    .filter((h) => h.qty > 0)
-  const heldValue = held.reduce((sum, h) => sum + h.qty * (h.price ?? 0), 0)
 
   return (
     <div className="space-y-4 px-4 py-4">
@@ -54,7 +46,7 @@ export default function MarketScreen({
 
       {today.length > 0 && (
         <ul className="divide-y divide-white/5 overflow-hidden rounded-xl bg-ink-850">
-          {(showAllNews ? today : today.slice(0, 2)).map((n, i) => (
+          {today.map((n, i) => (
             <li
               key={i}
               className={`animate-fade-in border-l-2 px-3 py-2 text-[13px] leading-snug ${
@@ -64,52 +56,7 @@ export default function MarketScreen({
               {n.text}
             </li>
           ))}
-          {today.length > 2 && (
-            <li>
-              <button onClick={() => setShowAllNews(!showAllNews)} className="w-full px-3 py-1.5 text-left text-[11px] font-semibold text-ink-400">
-                {showAllNews ? 'Vis færre' : `+ ${today.length - 2} ${today.length === 3 ? 'nyhet' : 'nyheter'} til`}
-              </button>
-            </li>
-          )}
         </ul>
-      )}
-
-      {held.length > 0 && (
-        <section aria-label="I sekken" className="rounded-2xl border border-cta/25 bg-cta/[0.04] p-3">
-          <div className="mb-2 flex items-baseline justify-between px-0.5">
-            <h2 className="font-display text-sm font-semibold tracking-[0.18em] text-cta uppercase">I sekken</h2>
-            <span className="tabular text-[11px] text-ink-400">
-              Verdi her <span className="font-semibold text-ink-100">{kr(heldValue)}</span>
-            </span>
-          </div>
-          <ul className="flex flex-wrap gap-1.5">
-            {held.map(({ item, qty, avgCost, price }) => {
-              const pl = price && avgCost > 0 ? Math.round(((price - avgCost) / avgCost) * 100) || null : null
-              return (
-                <li key={item.id}>
-                  <button
-                    disabled={price === undefined}
-                    onClick={() => onPick(item.id)}
-                    className="flex h-8 items-center gap-1.5 rounded-full border border-ink-700 bg-ink-850 pr-2.5 pl-1 text-xs active:bg-ink-800 disabled:opacity-40"
-                  >
-                    <span className="tabular rounded-full bg-cta px-1.5 py-0.5 text-[11px] font-bold text-ink-950">{num(qty)}</span>
-                    <span className="font-semibold">{item.name}</span>
-                    {price === undefined ? (
-                      <span className="text-ink-400">ikke her</span>
-                    ) : (
-                      pl !== null && (
-                        <span className={`tabular font-semibold ${pl >= 0 ? 'text-gain' : 'text-loss'}`}>
-                          {pl >= 0 ? '+' : '−'}
-                          {Math.abs(pl)}%
-                        </span>
-                      )
-                    )}
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-        </section>
       )}
 
       <section>

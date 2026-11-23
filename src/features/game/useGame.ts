@@ -17,6 +17,8 @@ export interface LocalScore {
   title: string
   date: string
   died: boolean
+  /** Missing on scores saved before Classic Mode: those are Clean. */
+  mode?: GameMode
 }
 
 /** A game plus what the server needs to verify it. */
@@ -98,9 +100,12 @@ export function useGame() {
           title: rankTitle(r.state.score),
           date: new Date().toISOString(),
           died: r.state.status === 'dead',
+          mode: r.state.mode,
         }
         setScores((prev) => {
-          const next = [...prev, entry].sort((a, b) => b.score - a.score).slice(0, 10)
+          // Keep the 10 best per mode.
+          const sorted = [...prev, entry].sort((a, b) => b.score - a.score)
+          const next = (['clean', 'classic'] as const).flatMap((m) => sorted.filter((x) => (x.mode ?? 'clean') === m).slice(0, 10))
           write(SCORES_KEY, next)
           return next
         })

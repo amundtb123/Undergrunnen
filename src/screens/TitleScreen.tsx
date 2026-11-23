@@ -74,6 +74,7 @@ export default function TitleScreen({
   onNew: () => void
 }) {
   const [showMode, setShowMode] = useState(false)
+  const mine = scores.filter((s) => (s.mode ?? 'clean') === mode).sort((a, b) => b.score - a.score)
   const taps = useRef<number[]>([])
   const secretTap = () => {
     const now = Date.now()
@@ -143,11 +144,11 @@ export default function TitleScreen({
         <Leaderboard limit={10} mode={mode} />
       </div>
 
-      {scores.length > 0 && (
+      {mine.length > 0 && (
         <section className="mt-8">
-          <h2 className="mb-2 font-display text-sm font-semibold tracking-[0.18em] text-ink-300 uppercase">Dine beste</h2>
+          <h2 className="mb-2 font-display text-sm font-semibold tracking-[0.18em] text-ink-300 uppercase">Dine beste{mode === 'classic' && <span className="ml-2 text-alert">Classic</span>}</h2>
           <ol className="overflow-hidden rounded-2xl border border-white/5 bg-ink-900">
-            {scores.slice(0, 5).map((s, i) => (
+            {mine.slice(0, 5).map((s, i) => (
               <li key={s.date} className="flex items-center justify-between border-b border-white/5 px-4 py-2.5 text-sm last:border-0">
                 <span className="text-ink-400">
                   {i + 1}. {s.title}

@@ -91,7 +91,7 @@ export default function App() {
 
   return (
     <div className="mx-auto flex h-dvh max-w-[480px] flex-col bg-ink-950 sm:border-x sm:border-white/5">
-      <StatusBar game={game} />
+      <StatusBar game={game} onHome={() => setInGame(false)} />
       <main className="flex-1 overflow-y-auto overscroll-contain">
         <div key={`${tab}-${game.cityId}-${game.day}`} className="animate-fade-in">
           {tab === 'marked' && (

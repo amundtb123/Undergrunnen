@@ -12,7 +12,7 @@ function Stat({ label, children, tone = '' }: { label: string; children: React.R
 }
 
 /** Header (wordmark + day) and the always-visible economy strip. */
-export default function StatusBar({ game }: { game: GameState }) {
+export default function StatusBar({ game, onHome }: { game: GameState; onHome: () => void }) {
   const used = inventoryUsed(game)
   const worth = netWorth(game)
   const progress = (game.day / game.maxDays) * 100
@@ -22,7 +22,13 @@ export default function StatusBar({ game }: { game: GameState }) {
     <header className="sticky top-0 z-30 border-b border-ink-700/70 bg-ink-950/90 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 backdrop-blur-md">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="font-display text-[15px] font-bold tracking-[0.12em] uppercase italic">Undergrunnen</div>
+          <button
+            onClick={onHome}
+            aria-label="Til forsiden"
+            className="-my-2 -ml-1 px-1 py-2 font-display text-[15px] font-bold tracking-[0.12em] uppercase italic active:opacity-60"
+          >
+            Undergrunnen
+          </button>
           {game.mode === 'classic' && (
             <span className="rounded border border-alert/50 px-1 text-[9px] font-bold tracking-wider text-alert uppercase">Classic</span>
           )}

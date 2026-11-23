@@ -24,7 +24,7 @@ export function CityBackdrop({ city }: { city: City }) {
   return (
     <div
       aria-hidden
-      className="grain pointer-events-none absolute inset-x-0 top-0 h-[270px] overflow-hidden"
+      className="grain pointer-events-none absolute inset-x-0 top-0 h-[340px] overflow-hidden"
       style={
         art
           ? undefined
@@ -40,7 +40,7 @@ export function CityBackdrop({ city }: { city: City }) {
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(180deg, rgb(13 17 16 / .55) 0%, rgb(13 17 16 / .15) 38%, rgb(13 17 16 / .55) 68%, #0d1110 100%)',
+            'linear-gradient(180deg, rgb(13 17 16 / .25) 0%, rgb(13 17 16 / 0) 30%, rgb(13 17 16 / .35) 62%, #0d1110 100%)',
         }}
       />
     </div>
@@ -67,7 +67,7 @@ export default function CityHero({ city, day }: { city: City; day: number }) {
 
   return (
     <div>
-      <div className="px-1 pt-14 pb-3">
+      <div className="px-1 pt-20 pb-3">
         <div className="text-[11px] font-semibold tracking-[0.2em] text-glow uppercase drop-shadow">
           {city.county === city.name ? city.region : city.county} · Dag {day}
         </div>
@@ -77,7 +77,7 @@ export default function CityHero({ city, day }: { city: City; day: number }) {
       <button
         onClick={toggle}
         aria-expanded={open}
-        className="block w-full rounded-xl border border-white/5 bg-ink-950/60 px-3 pt-2 pb-2.5 text-left backdrop-blur-md"
+        className="block w-full rounded-xl border border-white/10 bg-ink-950/45 px-3 pt-2 pb-2.5 text-left backdrop-blur-md"
       >
         <div className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] items-end gap-3">
           <Bars label="Marked" value={city.marketSize} />

@@ -45,7 +45,7 @@ export default function MarketScreen({
       )}
 
       {today.length > 0 && (
-        <ul className="divide-y divide-white/5 overflow-hidden rounded-xl bg-ink-850">
+        <ul className="divide-y divide-white/5 overflow-hidden rounded-xl border border-white/10 bg-ink-900/70 backdrop-blur-md">
           {today.map((n, i) => (
             <li
               key={i}

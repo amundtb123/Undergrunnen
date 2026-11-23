@@ -19,7 +19,8 @@ export default function StatusBar({ game, onHome }: { game: GameState; onHome: (
   const daysLeft = game.maxDays - game.day
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/5 bg-ink-950/55 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 backdrop-blur-md">
+    <header className="sticky top-0 z-30 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pb-1">
+      <div className="rounded-2xl border border-white/10 bg-ink-950/45 px-4 pt-3 pb-3 shadow-lg shadow-black/30 backdrop-blur-md">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
@@ -48,7 +49,7 @@ export default function StatusBar({ game, onHome }: { game: GameState; onHome: (
       <div className="mt-2 h-0.5 overflow-hidden rounded-full bg-ink-700">
         <div className="h-full bg-glow transition-[width] duration-700" style={{ width: `${progress}%` }} />
       </div>
-      <div className="mt-2.5 grid grid-cols-4 gap-3">
+      <div className="mt-2.5 grid grid-cols-4 divide-x divide-white/10 [&>*]:px-2.5 [&>*:first-child]:pl-0">
         <Stat label="Kontant" tone="text-ink-100">
           <AnimatedNumber value={game.cash} format={krShort} />
         </Stat>
@@ -75,6 +76,7 @@ export default function StatusBar({ game, onHome }: { game: GameState; onHome: (
           <span className="tabular text-ink-300">{game.health}</span>
         </div>
       )}
+      </div>
     </header>
   )
 }

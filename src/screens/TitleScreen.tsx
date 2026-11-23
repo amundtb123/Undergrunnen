@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { RULES, type GameMode } from '@engine/index.ts'
 import type { LocalScore } from '@/features/game/useGame.ts'
-import { haptic, kr } from '@/lib/format.ts'
+import { haptic, kr, num } from '@/lib/format.ts'
+import { fetchStats, type ModeStats } from '@/lib/scoresApi.ts'
 import Leaderboard from '@/components/game/Leaderboard.tsx'
 import Sheet from '@/components/ui/Sheet.tsx'
 
@@ -10,6 +11,10 @@ const SECRET_TAPS = 5
 /** Hidden mode switch: Classic (18+) with a self-declared age check. */
 function ModeSheet({ mode, onSet, onClose }: { mode: GameMode; onSet: (m: GameMode) => void; onClose: () => void }) {
   const [adult, setAdult] = useState(mode === 'classic')
+  const [stats, setStats] = useState<Record<GameMode, ModeStats> | null>(null)
+  useEffect(() => {
+    fetchStats().then(setStats, () => {})
+  }, [])
   return (
     <Sheet onClose={onClose}>
       <div className="text-[11px] font-semibold tracking-[0.2em] text-alert uppercase">Hemmelig meny</div>
@@ -35,6 +40,18 @@ function ModeSheet({ mode, onSet, onClose }: { mode: GameMode; onSet: (m: GameMo
         </button>
       </div>
       <p className="mt-3 text-[11px] text-ink-400">Gjelder neste nye spill. Et pågående spill beholder modusen sin.</p>
+      {stats && (
+        <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-ink-700/60 pt-3 text-[11px] text-ink-400">
+          {(['clean', 'classic'] as const).map((m) => (
+            <div key={m}>
+              <dt className="tracking-wider uppercase">{m}</dt>
+              <dd className="tabular text-ink-300">
+                {num(stats[m].started)} spilt · {num(stats[m].today)} i dag · {num(stats[m].listed)} på lista
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
     </Sheet>
   )
 }

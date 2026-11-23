@@ -43,3 +43,10 @@ export const submitRun = (runId: string, name: string, actions: Action[]) =>
 
 export const fetchTop = (limit = 20, mode: GameMode = 'clean') =>
   call<{ scores: TopScore[] }>(`top?limit=${limit}&mode=${mode}`).then((r) => r.scores)
+
+export interface ModeStats {
+  started: number
+  today: number
+  listed: number
+}
+export const fetchStats = () => call<Record<GameMode, ModeStats>>('stats')

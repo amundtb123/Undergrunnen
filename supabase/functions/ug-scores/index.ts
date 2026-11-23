@@ -3,6 +3,7 @@
 //   POST /ug-scores/start              { mode? } → { runId, seed }   server picks the seed
 //   POST /ug-scores/submit             { runId, name, actions } → { score, rank }
 //   GET  /ug-scores/top?limit=20&mode=clean|classic → { scores: [...] }
+//   GET  /ug-scores/stats              → { clean: {started, today, listed}, classic: {...} }
 //
 // The submitted action log is replayed with the shared engine; only the
 // replayed score is stored. Talks to Postgres directly (SUPABASE_DB_URL), so
@@ -115,6 +116,22 @@ async function top(req: Request): Promise<Response> {
   })
 }
 
+/** Play counts per mode: games started (all time and today, Oslo time) and scores on the list. */
+async function stats(req: Request): Promise<Response> {
+  const rows = await sql`
+    select r.mode,
+           count(*)::int as started,
+           count(*) filter (where r.created_at >= date_trunc('day', now() at time zone 'Europe/Oslo') at time zone 'Europe/Oslo')::int as today,
+           (select count(*)::int from undergrunnen.scores s where s.mode = r.mode) as listed
+    from undergrunnen.runs r group by r.mode`
+  const out: Record<string, { started: number; today: number; listed: number }> = {
+    clean: { started: 0, today: 0, listed: 0 },
+    classic: { started: 0, today: 0, listed: 0 },
+  }
+  for (const r of rows) out[r.mode] = { started: r.started, today: r.today, listed: r.listed }
+  return json(req, 200, out)
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(req) })
   const route = new URL(req.url).pathname.split('/').pop()
@@ -122,6 +139,7 @@ Deno.serve(async (req) => {
     if (req.method === 'POST' && route === 'start') return await start(req)
     if (req.method === 'POST' && route === 'submit') return await submit(req)
     if (req.method === 'GET' && route === 'top') return await top(req)
+    if (req.method === 'GET' && route === 'stats') return await stats(req)
     return json(req, 404, { error: 'NOT_FOUND' })
   } catch (err) {
     console.error(err)

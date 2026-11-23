@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getCity, tripFor, type CityId, type ItemId } from '@engine/index.ts'
 import { useGame } from '@/features/game/useGame.ts'
 import { CityBackdrop } from '@/components/game/CityHero.tsx'
@@ -42,6 +42,31 @@ export default function App() {
   useEffect(() => {
     document.querySelector('main')?.scrollTo({ top: 0 })
   }, [tab, game?.cityId])
+
+  // Header stays pinned until the element marked data-header-stop (the goods list) reaches it, then gets pushed up with it.
+  const mainRef = useRef<HTMLElement>(null)
+  const headRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const main = mainRef.current
+    const head = headRef.current
+    if (!main || !head) return
+    const update = () => {
+      const stop = main.querySelector('[data-header-stop]')
+      let shift = 0
+      if (stop) {
+        const top = stop.getBoundingClientRect().top - main.getBoundingClientRect().top
+        shift = Math.min(0, top - head.offsetHeight)
+      }
+      head.style.transform = shift ? `translateY(${shift}px)` : ''
+    }
+    update()
+    main.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      main.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [inGame, tab, game?.cityId, game?.day])
 
   const startNew = async () => {
     await newGame()
@@ -92,9 +117,11 @@ export default function App() {
 
   return (
     <div className="mx-auto flex h-dvh max-w-[480px] flex-col bg-ink-950 sm:border-x sm:border-white/5">
-      <main className="relative flex-1 overflow-y-auto overscroll-contain">
+      <main ref={mainRef} className="relative flex-1 overflow-y-auto overscroll-contain">
         <CityBackdrop city={getCity(game.cityId)!} />
-        <StatusBar game={game} onHome={() => setInGame(false)} />
+        <div ref={headRef} className="sticky top-0 z-30 will-change-transform">
+          <StatusBar game={game} onHome={() => setInGame(false)} />
+        </div>
         <div key={`${tab}-${game.cityId}-${game.day}`} className="relative animate-fade-in">
           {tab === 'marked' && (
             <MarketScreen game={game} onPick={setTradeItem} onFinish={() => dispatch({ type: 'retire' })} />

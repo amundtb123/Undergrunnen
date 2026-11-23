@@ -59,7 +59,7 @@ export default function MarketScreen({
         </ul>
       )}
 
-      <section>
+      <section data-header-stop>
         <div className="mb-2 flex items-baseline justify-between px-1">
           <h2 className="font-display text-sm font-semibold tracking-[0.18em] text-ink-300 uppercase">Markedet i dag</h2>
           <span className="text-[11px] text-ink-400">▲▼ fra i går</span>

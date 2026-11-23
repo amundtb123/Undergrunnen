@@ -123,24 +123,33 @@ export default function MarketScreen({
                 <button
                   disabled={price === undefined}
                   onClick={() => onPick(item.id)}
-                  className={`relative flex h-full min-h-[76px] w-full flex-col justify-between rounded-xl border px-3 py-2 text-left transition-colors active:bg-ink-800 disabled:opacity-35 ${
+                  className={`flex h-full min-h-[72px] w-full flex-col gap-0.5 rounded-xl border px-3 py-2 text-left transition-colors active:bg-ink-800 disabled:opacity-35 ${
                     owned ? 'border-cta/45 bg-cta/[0.06]' : 'border-white/5 bg-ink-900'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-1">
-                    <span className="min-w-0 truncate text-[13px] font-semibold">{item.name}</span>
+                  <span className="truncate text-[13px] font-semibold">{item.name}</span>
+                  <div className="flex flex-1 items-center justify-between gap-2">
+                  <div className="flex min-w-0 flex-col justify-center gap-0.5">
+                    {price ? (
+                      <div className="tabular font-display text-lg leading-tight font-semibold whitespace-nowrap">{kr(price)}</div>
+                    ) : (
+                      <div className="text-xs text-ink-400">Ikke i dag</div>
+                    )}
                     {owned && (
-                      <span className="tabular shrink-0 rounded-full bg-cta px-1.5 text-[11px] leading-[18px] font-bold text-ink-950">
-                        {num(h.qty)}
-                      </span>
+                      <div className="flex items-center gap-1.5 text-[10px] font-semibold">
+                        <span className="tabular rounded-full bg-cta px-1.5 text-[11px] leading-[16px] font-bold text-ink-950">
+                          {num(h.qty)}
+                        </span>
+                        {pl !== null && (
+                          <span className={`tabular ${pl >= 0 ? 'text-gain' : 'text-loss'}`} title="Gevinst mot snittpris">
+                            {pl >= 0 ? '+' : '−'}
+                            {Math.abs(pl)}%
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
-                  {price ? (
-                    <div className="tabular font-display text-lg leading-tight font-semibold">{kr(price)}</div>
-                  ) : (
-                    <div className="text-xs text-ink-400">Ikke i dag</div>
-                  )}
-                  <div className="flex min-h-4 items-center gap-1.5 text-[10px] font-semibold">
+                  <div className="flex shrink-0 flex-col items-end justify-center gap-1 text-[10px] font-semibold">
                     {price && t != null && t !== 0 && (
                       <span className={`tabular ${t > 0 ? 'text-gain' : 'text-loss'}`}>
                         {t > 0 ? '▲' : '▼'}
@@ -148,12 +157,7 @@ export default function MarketScreen({
                       </span>
                     )}
                     {tag && <span className={`rounded px-1 py-px uppercase ${tag.cls}`}>{tag.text}</span>}
-                    {pl !== null && (
-                      <span className={`tabular ml-auto ${pl >= 0 ? 'text-gain' : 'text-loss'}`} title="Gevinst mot snittpris">
-                        {pl >= 0 ? '+' : '−'}
-                        {Math.abs(pl)}%
-                      </span>
-                    )}
+                  </div>
                   </div>
                 </button>
               </li>

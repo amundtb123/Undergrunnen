@@ -13,15 +13,31 @@ export default function TravelScreen({ game, onTravel }: { game: GameState; onTr
 
   return (
     <div className="px-4 py-4">
-      <div className="relative mx-auto aspect-[300/420] max-h-[40dvh] overflow-hidden rounded-2xl border border-white/5 bg-ink-900">
-        <NorwayMap current={game.cityId} selected={selected} onSelect={setSelected} />
-        <div className="pointer-events-none absolute top-3 left-4 font-display text-xs tracking-[0.2em] text-ink-400 uppercase">
-          Velg destinasjon
-        </div>
-      </div>
-
-      {dest && r ? (
-        <div key={dest.id} ref={(el) => el?.scrollIntoView({ behavior: "smooth", block: "nearest" })} className="mt-4 animate-fade-in rounded-2xl border border-white/10 bg-ink-850 p-4">
+      <h2 className="mb-2 px-1 font-display text-sm font-semibold tracking-[0.18em] text-ink-300 uppercase">Velg destinasjon</h2>
+      <ul className="grid grid-cols-2 gap-2">
+        {CITIES.filter((c) => c.id !== game.cityId).map((c) => {
+          const rr = tripFor(game, c.id)
+          const on = c.id === selected
+          return (
+            <li key={c.id}>
+              <button
+                onClick={() => setSelected(on ? null : c.id)}
+                aria-pressed={on}
+                className={`w-full rounded-xl border px-3 py-2 text-left transition-colors active:bg-ink-800 ${
+                  on ? 'border-cta/60 bg-cta/10' : 'border-white/5 bg-ink-900'
+                }`}
+              >
+                <div className="font-semibold">{c.name}</div>
+                <div className="tabular text-xs text-ink-400">
+                  {rr.days} dag{rr.days > 1 ? 'er' : ''} · {rr.mode === 'Haik' ? <span className="text-alert">haik</span> : kr(rr.cost)}
+                </div>
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+      {dest && r && (
+        <div key={dest.id} ref={(el) => el?.scrollIntoView({ behavior: "smooth", block: "nearest" })} className="mt-3 animate-fade-in rounded-2xl border border-cta/25 bg-ink-850 p-4">
           <div className="flex items-start justify-between">
             <div>
               <div className="text-[11px] font-semibold tracking-[0.18em] text-ink-400 uppercase">
@@ -29,7 +45,6 @@ export default function TravelScreen({ game, onTravel }: { game: GameState; onTr
               </div>
               <div className="font-display text-2xl font-bold tracking-wide uppercase">{dest.name}</div>
               <p className="text-sm text-ink-400">{dest.tagline}</p>
-              <p className="mt-1 text-xs text-ink-400/80">{dest.geography}</p>
             </div>
             <div className="text-right text-xs text-ink-400">
               Risiko
@@ -70,26 +85,10 @@ export default function TravelScreen({ game, onTravel }: { game: GameState; onTr
             {tooLate ? 'Rekker ikke frem' : hitch ? `Haik til ${dest.name}` : `Reis til ${dest.name}`}
           </button>
         </div>
-      ) : (
-        <ul className="mt-4 grid grid-cols-2 gap-2">
-          {CITIES.filter((c) => c.id !== game.cityId).map((c) => {
-            const rr = tripFor(game, c.id)
-            return (
-              <li key={c.id}>
-                <button
-                  onClick={() => setSelected(c.id)}
-                  className="w-full rounded-xl border border-white/5 bg-ink-900 px-3 py-2.5 text-left active:bg-ink-800"
-                >
-                  <div className="font-semibold">{c.name}</div>
-                  <div className="tabular text-xs text-ink-400">
-                    {rr.days}d · {kr(rr.cost)}
-                  </div>
-                </button>
-              </li>
-            )
-          })}
-        </ul>
       )}
+      <div className="relative mx-auto mt-4 aspect-[300/420] max-h-[36dvh] overflow-hidden rounded-2xl border border-white/5 bg-ink-900">
+        <NorwayMap current={game.cityId} selected={selected} onSelect={setSelected} />
+      </div>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { getCity, itemsFor, marketTrend, type GameState, type ItemId } from '@engine/index.ts'
 import CityHero from '@/components/game/CityHero.tsx'
 import { kr, num } from '@/lib/format.ts'
@@ -22,6 +22,7 @@ export default function MarketScreen({
 }) {
   const city = getCity(game.cityId)!
   const today = game.news.filter((n) => n.day === game.day)
+  const [showAllNews, setShowAllNews] = useState(false)
   const lastDay = game.day >= game.maxDays
   const trend = useMemo(
     () => marketTrend(game.seed, game.day, game.cityId, game.market, game.mode),
@@ -52,18 +53,24 @@ export default function MarketScreen({
       )}
 
       {today.length > 0 && (
-        <ul className="space-y-2">
-          {today.map((n, i) => (
+        <ul className="divide-y divide-white/5 overflow-hidden rounded-xl bg-ink-850">
+          {(showAllNews ? today : today.slice(0, 2)).map((n, i) => (
             <li
               key={i}
-              className={`animate-fade-in rounded-xl border-l-2 bg-ink-850 px-3 py-2.5 text-sm ${
+              className={`animate-fade-in border-l-2 px-3 py-2 text-[13px] leading-snug ${
                 n.tone === 'bad' ? 'border-loss text-ink-100' : n.tone === 'good' ? 'border-gain' : 'border-alert/60 text-ink-300'
               }`}
-              style={{ animationDelay: `${i * 70}ms` }}
             >
               {n.text}
             </li>
           ))}
+          {today.length > 2 && (
+            <li>
+              <button onClick={() => setShowAllNews(!showAllNews)} className="w-full px-3 py-1.5 text-left text-[11px] font-semibold text-ink-400">
+                {showAllNews ? 'Vis færre' : `+ ${today.length - 2} ${today.length === 3 ? 'nyhet' : 'nyheter'} til`}
+              </button>
+            </li>
+          )}
         </ul>
       )}
 

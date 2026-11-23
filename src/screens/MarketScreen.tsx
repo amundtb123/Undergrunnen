@@ -27,6 +27,13 @@ export default function MarketScreen({
     () => marketTrend(game.seed, game.day, game.cityId, game.market, game.mode),
     [game.seed, game.day, game.cityId, game.market, game.mode],
   )
+  const held = itemsFor(game.mode)
+    .map((item) => {
+      const h = game.inventory[item.id]
+      return { item, qty: h?.qty ?? 0, avgCost: h?.avgCost ?? 0, price: game.market[item.id] }
+    })
+    .filter((h) => h.qty > 0)
+  const heldValue = held.reduce((sum, h) => sum + h.qty * (h.price ?? 0), 0)
 
   return (
     <div className="space-y-4 px-4 py-4">
@@ -60,59 +67,92 @@ export default function MarketScreen({
         </ul>
       )}
 
+      {held.length > 0 && (
+        <section aria-label="I sekken" className="rounded-2xl border border-cta/25 bg-cta/[0.04] p-3">
+          <div className="mb-2 flex items-baseline justify-between px-0.5">
+            <h2 className="font-display text-sm font-semibold tracking-[0.18em] text-cta uppercase">I sekken</h2>
+            <span className="tabular text-[11px] text-ink-400">
+              Verdi her <span className="font-semibold text-ink-100">{kr(heldValue)}</span>
+            </span>
+          </div>
+          <ul className="flex flex-wrap gap-1.5">
+            {held.map(({ item, qty, avgCost, price }) => {
+              const pl = price && avgCost > 0 ? Math.round(((price - avgCost) / avgCost) * 100) || null : null
+              return (
+                <li key={item.id}>
+                  <button
+                    disabled={price === undefined}
+                    onClick={() => onPick(item.id)}
+                    className="flex h-8 items-center gap-1.5 rounded-full border border-ink-700 bg-ink-850 pr-2.5 pl-1 text-xs active:bg-ink-800 disabled:opacity-40"
+                  >
+                    <span className="tabular rounded-full bg-cta px-1.5 py-0.5 text-[11px] font-bold text-ink-950">{num(qty)}</span>
+                    <span className="font-semibold">{item.name}</span>
+                    {price === undefined ? (
+                      <span className="text-ink-400">ikke her</span>
+                    ) : (
+                      pl !== null && (
+                        <span className={`tabular font-semibold ${pl >= 0 ? 'text-gain' : 'text-loss'}`}>
+                          {pl >= 0 ? '+' : '−'}
+                          {Math.abs(pl)}%
+                        </span>
+                      )
+                    )}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      )}
+
       <section>
         <div className="mb-2 flex items-baseline justify-between px-1">
           <h2 className="font-display text-sm font-semibold tracking-[0.18em] text-ink-300 uppercase">Markedet i dag</h2>
-          <span className="text-[11px] text-ink-400">▲▼ fra i går · trykk for å handle</span>
+          <span className="text-[11px] text-ink-400">▲▼ fra i går</span>
         </div>
-        <ul className="overflow-hidden rounded-2xl border border-white/5 bg-ink-900">
+        <ul className="grid grid-cols-2 gap-2">
           {itemsFor(game.mode).map((item) => {
             const price = game.market[item.id]
-            const held = game.inventory[item.id]
+            const h = game.inventory[item.id]
+            const owned = !!h && h.qty > 0
             const tag = price ? priceTag(price / item.basePrice) : null
-            const canAct = price !== undefined
+            const t = trend[item.id]
+            const pl = owned && price && h.avgCost > 0 ? Math.round(((price - h.avgCost) / h.avgCost) * 100) || null : null
             return (
-              <li key={item.id} className="border-b border-white/5 last:border-0">
+              <li key={item.id}>
                 <button
-                  disabled={!canAct}
+                  disabled={price === undefined}
                   onClick={() => onPick(item.id)}
-                  className="flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left transition-colors active:bg-ink-800 disabled:opacity-35"
+                  className={`relative flex h-full min-h-[76px] w-full flex-col justify-between rounded-xl border px-3 py-2 text-left transition-colors active:bg-ink-800 disabled:opacity-35 ${
+                    owned ? 'border-cta/45 bg-cta/[0.06]' : 'border-white/5 bg-ink-900'
+                  }`}
                 >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate font-semibold">{item.name}</span>
-                      {tag && <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${tag.cls}`}>{tag.text}</span>}
-                    </div>
-                    <div className="mt-0.5 text-xs text-ink-400">
-                      {held ? (
-                        <span className="text-ink-300">
-                          Du har <span className="tabular font-semibold text-ink-100">{num(held.qty)}</span>
-                          {held.avgCost > 0 && <> · snitt {kr(held.avgCost)}</>}
-                          {price && held.avgCost > 0 && (
-                            <span className={`tabular ml-1 font-semibold ${price >= held.avgCost ? 'text-gain' : 'text-loss'}`}>
-                              {price >= held.avgCost ? '+' : '−'}
-                              {Math.abs(Math.round(((price - held.avgCost) / held.avgCost) * 100))}%
-                            </span>
-                          )}
-                        </span>
-                      ) : (
-                        <>Plass {item.size} per stk</>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    {price ? (
-                      <div className="tabular font-display text-lg font-semibold">{kr(price)}</div>
-                    ) : (
-                      <div className="text-xs text-ink-400">Ikke i dag</div>
+                  <div className="flex items-start justify-between gap-1">
+                    <span className="min-w-0 truncate text-[13px] font-semibold">{item.name}</span>
+                    {owned && (
+                      <span className="tabular shrink-0 rounded-full bg-cta px-1.5 text-[11px] leading-[18px] font-bold text-ink-950">
+                        {num(h.qty)}
+                      </span>
                     )}
-                    {price && trend[item.id] != null && trend[item.id] !== 0 && (
-                      <div
-                        className={`tabular text-[11px] font-semibold ${trend[item.id]! > 0 ? 'text-gain' : 'text-loss'}`}
-                        title="Endring fra i går"
-                      >
-                        {trend[item.id]! > 0 ? '▲' : '▼'} {Math.abs(trend[item.id]!)}%
-                      </div>
+                  </div>
+                  {price ? (
+                    <div className="tabular font-display text-lg leading-tight font-semibold">{kr(price)}</div>
+                  ) : (
+                    <div className="text-xs text-ink-400">Ikke i dag</div>
+                  )}
+                  <div className="flex min-h-4 items-center gap-1.5 text-[10px] font-semibold">
+                    {price && t != null && t !== 0 && (
+                      <span className={`tabular ${t > 0 ? 'text-gain' : 'text-loss'}`}>
+                        {t > 0 ? '▲' : '▼'}
+                        {Math.abs(t)}%
+                      </span>
+                    )}
+                    {tag && <span className={`rounded px-1 py-px uppercase ${tag.cls}`}>{tag.text}</span>}
+                    {pl !== null && (
+                      <span className={`tabular ml-auto ${pl >= 0 ? 'text-gain' : 'text-loss'}`} title="Gevinst mot snittpris">
+                        {pl >= 0 ? '+' : '−'}
+                        {Math.abs(pl)}%
+                      </span>
                     )}
                   </div>
                 </button>

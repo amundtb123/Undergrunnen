@@ -86,9 +86,11 @@ export default function TravelScreen({ game, onTravel }: { game: GameState; onTr
           </button>
         </div>
       )}
-      <div className="relative mx-auto mt-4 aspect-[300/420] max-h-[36dvh] overflow-hidden rounded-2xl border border-white/5 bg-ink-900">
-        <NorwayMap current={game.cityId} selected={selected} onSelect={setSelected} />
-      </div>
+      {!dest && (
+        <div className="relative mx-auto mt-4 aspect-[300/420] max-h-[36dvh] overflow-hidden rounded-2xl border border-white/5 bg-ink-900">
+          <NorwayMap current={game.cityId} selected={selected} onSelect={setSelected} />
+        </div>
+      )}
     </div>
   )
 }
